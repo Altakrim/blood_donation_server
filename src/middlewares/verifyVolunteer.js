@@ -1,15 +1,23 @@
-const { usersCollection } = require("../server");
+const { usersCollection } = require("../db");
 
 const verifyVolunteer = async (req, res, next) => {
-  const email = req.decoded.email;
+  try {
+    const email = req.decoded?.email;
 
-  const user = await usersCollection.findOne({ email });
+    if (!email) {
+      return res.status(401).send({ message: "Unauthorized" });
+    }
 
-  if (user?.role !== "volunteer") {
-    return res.status(403).send({ message: "Forbidden access" });
+    const user = await usersCollection.findOne({ email });
+
+    if (user?.role !== "volunteer") {
+      return res.status(403).send({ message: "Forbidden access" });
+    }
+
+    next();
+  } catch (error) {
+    res.status(500).send({ message: "Server error" });
   }
-
-  next();
 };
 
 module.exports = verifyVolunteer;

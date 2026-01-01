@@ -1,15 +1,40 @@
-const {usersCollection} = require("../server");
+// const {usersCollection} = require("../server");
+
+// const verifyAdmin = async (req, res, next) => {
+//   const email = req.decoded.email;
+
+//   const user = await usersCollection.findOne({ email });
+
+//   if (user?.role !== "admin") {
+//     return res.status(403).send({ message: "Forbidden access" });
+//   }
+
+//   next();
+// };
+
+// // module.exports = verifyAdmin;
+
+const { usersCollection } = require("../db");
 
 const verifyAdmin = async (req, res, next) => {
-  const email = req.decoded.email;
+  try {
+    const email = req.decoded?.email;
 
-  const user = await usersCollection.findOne({ email });
+    if (!email) {
+      return res.status(401).send({ message: "Unauthorized access" });
+    }
 
-  if (user?.role !== "admin") {
-    return res.status(403).send({ message: "Forbidden access" });
+    const user = await usersCollection.findOne({ email });
+
+    if (user?.role !== "admin") {
+      return res.status(403).send({ message: "Forbidden: Admin only" });
+    }
+
+    next();
+  } catch (error) {
+    res.status(500).send({ message: "Server error" });
   }
-
-  next();
 };
 
 module.exports = verifyAdmin;
+

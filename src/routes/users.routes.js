@@ -1,5 +1,6 @@
 const express = require("express");
 const verifyJWT = require("../middlewares/verifyJWT");
+const verifyVolunteer = require("../middlewares/verifyVolunteer");
 const { usersCollection } = require("../db"); // adjust path if needed
 
 const router = express.Router();
@@ -36,6 +37,25 @@ router.patch("/me", verifyJWT, async (req, res) => {
 
   res.send(result);
 });
+
+// Volunteer: update donation status only
+router.patch(
+  "/status/:id",
+  verifyJWT,
+  verifyVolunteer,
+  async (req, res) => {
+    const id = req.params.id;
+    const { status } = req.body;
+
+    const result = await donationsCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { status } }
+    );
+
+    res.send(result);
+  }
+);
+
 
 /* =========================
    TEST: Profile route

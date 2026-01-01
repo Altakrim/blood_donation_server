@@ -1,6 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const verifyJWT = require("../middlewares/verifyJWT");
+const verifyAdmin = require("../middlewares/verifyAdmin");
 const { usersCollection } = require("../db");
 
 const router = express.Router();
@@ -9,6 +10,15 @@ const router = express.Router();
 router.get("/", verifyJWT, async (req, res) => {
   const users = await usersCollection.find().toArray();
   res.send(users);
+});
+
+// Dashboard Stats
+router.get("/stats", verifyJWT, verifyAdmin, async (req, res) => {
+  const users = await usersCollection.countDocuments();
+  const requests = await donationRequestCollection.countDocuments({status: "pending"});
+  const done = await donationRequestCollection.countDocuments({status: "done"});
+
+  res.send({users, requests, pending, done})
 });
 
 // save user (register)
