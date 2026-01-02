@@ -1,25 +1,29 @@
 const express = require('express');
 const cors = require('cors');
 const usersRoutes = require("./routes/users.routes");
-const userAdmin = require('./routes/admin.routes');
+const adminRoute = require('./routes/admin.routes');
 const volunteerRoutes = require('./routes/volunteer.routes');
-const donationsRoutes = require("./routes/donation.routes")
+const donationsRoutes = require("./routes/donation.routes");
+const fundingRoutes = require("./routes/funding.routes.js");
 
 const app = express();
 
 
 // middleware
-app.use(cors());
+app.use(cors({
+  origin:[
+    "http://localhost:5000",
+    "https://stalwart-cupcake-aac346.netlify.app"
+  ]
+}));
 app.use(express.json());
 
 app.use('/users', usersRoutes)
-app.use('/admin', userAdmin);
+app.use('/admin', adminRoute);
 app.use('/volunteer', volunteerRoutes);
-app.use('/donations',donationsRoutes )
+app.use('/donations',donationsRoutes );
+app.use('/funding', fundingRoutes);
 
-// // routes
-// app.use("/users", require("./routes/users.routes"));
-// app.use("/donations", require("./routes/donations.routes"));
 
 
 app.get('/', (req, res) => {
