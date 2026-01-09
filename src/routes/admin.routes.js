@@ -2,26 +2,26 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const verifyJWT = require("../middlewares/verifyJWT");
 const verifyAdmin = require("../middlewares/verifyAdmin");
-const { usersCollection } = require("../db");
+const { usersCollection, donationsCollection } = require("../db");
 
 const router = express.Router();
 
-// get all users (protected)
-router.get("/", verifyJWT, async (req, res) => {
+// Get all users (admin only better)
+router.get("/", verifyJWT, verifyAdmin, async (req, res) => {
   const users = await usersCollection.find().toArray();
   res.send(users);
 });
 
-// Dashboard Stats
+// Dashboard Stats (admin)
 router.get("/stats", verifyJWT, verifyAdmin, async (req, res) => {
   const users = await usersCollection.countDocuments();
-  const requests = await donationRequestCollection.countDocuments({status: "pending"});
-  const done = await donationRequestCollection.countDocuments({status: "done"});
+  const pending = await donationsCollection.countDocuments({ status: "pending" });
+  const done = await donationsCollection.countDocuments({ status: "done" });
 
-  res.send({users, requests, pending, done})
+  res.send({ users, pending, done });
 });
 
-// save user (register)
+// Save user (register)
 router.post("/", async (req, res) => {
   const user = req.body;
 
@@ -34,7 +34,7 @@ router.post("/", async (req, res) => {
   res.send(result);
 });
 
-// jwt create
+// JWT create
 router.post("/jwt", (req, res) => {
   const user = req.body;
 
@@ -48,5 +48,22 @@ router.post("/jwt", (req, res) => {
 
   res.send({ token });
 });
+
+// / Change user role
+router.patch("/role/:id", verifyJWT, verifyAdmin, async (req, res) => {
+  const { role } = req.body;
+
+  if (!role) {
+    return res.status(400).send({ message: "Role is required" });
+  }
+
+  const result = await usersCollection.updateOne(
+    { _id: new ObjectId(req.params.id) },
+    { $set: { role } }
+  );
+
+  res.send({ message: "Role updated", result });
+});
+
 
 module.exports = router;

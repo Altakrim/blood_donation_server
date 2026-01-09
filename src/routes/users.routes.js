@@ -5,17 +5,16 @@ const { usersCollection } = require("../db"); // adjust path if needed
 
 const router = express.Router();
 
-/* =========================
-   GET: All users (Admin use)
-========================= */
+
+  //  GET: All users (Admin use)
 router.get("/", verifyJWT, async (req, res) => {
   const users = await usersCollection.find().toArray();
   res.send(users);
 });
 
-/* =========================
-   GET: Logged-in user profile
-========================= */
+
+  //  GET: Logged-in user profile
+
 router.get("/me", verifyJWT, async (req, res) => {
   const email = req.decoded.email;
 
@@ -23,9 +22,9 @@ router.get("/me", verifyJWT, async (req, res) => {
   res.send(user);
 });
 
-/* =========================
-   PATCH: Update profile
-========================= */
+
+  //  PATCH: Update profile
+
 router.patch("/me", verifyJWT, async (req, res) => {
   const email = req.decoded.email;
   const updatedInfo = req.body;
@@ -57,9 +56,9 @@ router.patch(
 );
 
 
-/* =========================
-   TEST: Profile route
-========================= */
+
+  //  TEST: Profile route
+
 router.get("/profile", verifyJWT, async (req, res) => {
   res.send({
     message: "User profile data",
